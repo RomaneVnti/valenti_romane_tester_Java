@@ -12,9 +12,17 @@ public class DataBaseConfig {
     public Connection getConnection() throws ClassNotFoundException, SQLException {
         logger.info("Create DB connection");
         Class.forName("com.mysql.cj.jdbc.Driver");
-        return DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/prod","root","Norbert@oli34");
+        try {
+            Connection connection = DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/test?user=root&password=NorbertOli34&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC");
+            logger.info("DB connection established.");
+            return connection;
+        } catch (SQLException e) {
+            logger.error("Failed to create DB connection", e);
+            throw e;
+        }
     }
+
 
     public void closeConnection(Connection con){
         if(con!=null){
