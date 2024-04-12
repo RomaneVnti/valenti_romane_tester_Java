@@ -5,35 +5,34 @@ import com.parkit.parkingsystem.model.Ticket;
 
 <span class="fc" id="L6">public class FareCalculatorService {</span>
 
-        public void calculateFare(Ticket ticket){
-<span class="pc bpc" id="L9" title="1 of 4 branches missed.">            if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){</span>
-<span class="fc" id="L10">                throw new IllegalArgumentException(&quot;Out time provided is incorrect:&quot; + ticket.getOutTime().toString());</span>
-            }
+    public void calculateFare(Ticket ticket){
+<span class="pc bpc" id="L9" title="1 of 4 branches missed.">        if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){</span>
+<span class="fc" id="L10">            throw new IllegalArgumentException(&quot;Out time provided is incorrect:&quot; + ticket.getOutTime().toString());</span>
+        }
 
-            // Calculating duration in milliseconds
-<span class="fc" id="L14">            long durationInMillis = ticket.getOutTime().getTime() - ticket.getInTime().getTime();</span>
+<span class="fc" id="L13">        long durationInMillis = ticket.getOutTime().getTime() - ticket.getInTime().getTime();</span>
 
-            // Convert milliseconds to hours (1 hour = 3600000 millis)
-<span class="fc" id="L17">            double durationInHours = durationInMillis / 3600000.0;</span>
+        // Convert milliseconds to hours
+<span class="fc" id="L16">        double durationInHours = durationInMillis / 3600000.0;</span>
 
-            // If duration is less than or equal to 30 minutes, set price to 0
-<span class="fc bfc" id="L20" title="All 2 branches covered.">            if (durationInHours &lt;= 0.5) {</span>
-<span class="fc" id="L21">                ticket.setPrice(0);</span>
-<span class="fc" id="L22">                return;</span>
-            }
-
-<span class="pc bpc" id="L25" title="1 of 3 branches missed.">            switch (ticket.getParkingSpot().getParkingType()){</span>
+        // Check if the parking duration is less than 30 minutes (1800000 milliseconds)
+<span class="fc bfc" id="L19" title="All 2 branches covered.">        if (durationInMillis &lt; 1800000) {</span>
+<span class="fc" id="L20">            ticket.setPrice(0);</span>
+        } else {
+<span class="pc bpc" id="L22" title="1 of 3 branches missed.">            switch (ticket.getParkingSpot().getParkingType()){</span>
                 case CAR: {
-<span class="fc" id="L27">                    ticket.setPrice(durationInHours * Fare.CAR_RATE_PER_HOUR);</span>
-<span class="fc" id="L28">                    break;</span>
+<span class="fc" id="L24">                    ticket.setPrice(durationInHours * Fare.CAR_RATE_PER_HOUR);</span>
+<span class="fc" id="L25">                    break;</span>
                 }
                 case BIKE: {
-<span class="fc" id="L31">                    ticket.setPrice(durationInHours * Fare.BIKE_RATE_PER_HOUR);</span>
-<span class="fc" id="L32">                    break;</span>
+<span class="fc" id="L28">                    ticket.setPrice(durationInHours * Fare.BIKE_RATE_PER_HOUR);</span>
+<span class="fc" id="L29">                    break;</span>
                 }
                 default:
-<span class="nc" id="L35">                    throw new IllegalArgumentException(&quot;Unknown Parking Type&quot;);</span>
+<span class="nc" id="L32">                    throw new IllegalArgumentException(&quot;Unknown Parking Type&quot;);</span>
             }
-<span class="fc" id="L37">        }</span>
-    }
+        }
+<span class="fc" id="L35">    }</span>
+
+}
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

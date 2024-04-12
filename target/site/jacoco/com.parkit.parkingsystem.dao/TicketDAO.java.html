@@ -91,28 +91,6 @@ import java.sql.Timestamp;
 <span class="nc" id="L91">        return false;</span>
     }
 
-    public boolean isRecurringUser(String vehicleRegNumber) {
-<span class="nc" id="L95">        Connection con = null;</span>
-<span class="nc" id="L96">        PreparedStatement ps = null;</span>
-<span class="nc" id="L97">        ResultSet rs = null;</span>
-        try {
-<span class="nc" id="L99">            con = dataBaseConfig.getConnection();</span>
-<span class="nc" id="L100">            String query = &quot;SELECT COUNT(*) AS count FROM ticket WHERE VEHICLE_REG_NUMBER = ?&quot;;</span>
-<span class="nc" id="L101">            ps = con.prepareStatement(query);</span>
-<span class="nc" id="L102">            ps.setString(1, vehicleRegNumber);</span>
-<span class="nc" id="L103">            rs = ps.executeQuery();</span>
-<span class="nc bnc" id="L104" title="All 4 branches missed.">            if (rs.next() &amp;&amp; rs.getInt(&quot;count&quot;) &gt; 1) {</span>
-<span class="nc" id="L105">                return true;  // User is recurring if there is more than one record</span>
-            }
-<span class="nc" id="L107">        } catch (Exception ex){</span>
-<span class="nc" id="L108">            logger.error(&quot;SQL error while checking if user is recurring&quot;, ex);</span>
-        } finally {
-<span class="nc" id="L110">            dataBaseConfig.closeResultSet(rs);</span>
-<span class="nc" id="L111">            dataBaseConfig.closePreparedStatement(ps);</span>
-<span class="nc" id="L112">            dataBaseConfig.closeConnection(con);</span>
-        }
-<span class="nc" id="L114">        return false;</span>
-    }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

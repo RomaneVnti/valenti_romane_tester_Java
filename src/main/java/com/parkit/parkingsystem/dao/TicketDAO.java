@@ -91,27 +91,5 @@ public class TicketDAO {
         return false;
     }
 
-    public boolean isRecurringUser(String vehicleRegNumber) {
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            con = dataBaseConfig.getConnection();
-            String query = "SELECT COUNT(*) AS count FROM ticket WHERE VEHICLE_REG_NUMBER = ?";
-            ps = con.prepareStatement(query);
-            ps.setString(1, vehicleRegNumber);
-            rs = ps.executeQuery();
-            if (rs.next() && rs.getInt("count") > 1) {
-                return true;  // User is recurring if there is more than one record
-            }
-        } catch (Exception ex){
-            logger.error("SQL error while checking if user is recurring", ex);
-        } finally {
-            dataBaseConfig.closeResultSet(rs);
-            dataBaseConfig.closePreparedStatement(ps);
-            dataBaseConfig.closeConnection(con);
-        }
-        return false;
-    }
 
 }

@@ -5,23 +5,20 @@ import com.parkit.parkingsystem.model.Ticket;
 
 public class FareCalculatorService {
 
-        public void calculateFare(Ticket ticket){
-            if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
-                throw new IllegalArgumentException("Out time provided is incorrect:" + ticket.getOutTime().toString());
-            }
+    public void calculateFare(Ticket ticket){
+        if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
+            throw new IllegalArgumentException("Out time provided is incorrect:" + ticket.getOutTime().toString());
+        }
 
-            // Calculating duration in milliseconds
-            long durationInMillis = ticket.getOutTime().getTime() - ticket.getInTime().getTime();
+        long durationInMillis = ticket.getOutTime().getTime() - ticket.getInTime().getTime();
 
-            // Convert milliseconds to hours (1 hour = 3600000 millis)
-            double durationInHours = durationInMillis / 3600000.0;
+        // Convert milliseconds to hours
+        double durationInHours = durationInMillis / 3600000.0;
 
-            // If duration is less than or equal to 30 minutes, set price to 0
-            if (durationInHours <= 0.5) {
-                ticket.setPrice(0);
-                return;
-            }
-
+        // Check if the parking duration is less than 30 minutes (1800000 milliseconds)
+        if (durationInMillis < 1800000) {
+            ticket.setPrice(0);
+        } else {
             switch (ticket.getParkingSpot().getParkingType()){
                 case CAR: {
                     ticket.setPrice(durationInHours * Fare.CAR_RATE_PER_HOUR);
@@ -36,3 +33,5 @@ public class FareCalculatorService {
             }
         }
     }
+
+}
