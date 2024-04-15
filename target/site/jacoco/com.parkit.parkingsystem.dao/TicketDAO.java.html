@@ -91,6 +91,29 @@ import java.sql.Timestamp;
 <span class="nc" id="L91">        return false;</span>
     }
 
+    public int getNbTickets(String vehicleRegNumber) {
+<span class="nc" id="L95">        Connection con = null;</span>
+<span class="nc" id="L96">        PreparedStatement ps = null;</span>
+<span class="nc" id="L97">        ResultSet rs = null;</span>
+<span class="nc" id="L98">        int count = 0;</span>
 
+        try {
+<span class="nc" id="L101">            con = dataBaseConfig.getConnection();</span>
+<span class="nc" id="L102">            ps = con.prepareStatement(&quot;SELECT COUNT(*) AS total FROM ticket WHERE vehicle_reg_number = ?&quot;);</span>
+<span class="nc" id="L103">            ps.setString(1, vehicleRegNumber);</span>
+<span class="nc" id="L104">            rs = ps.executeQuery();</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">            if (rs.next()) {</span>
+<span class="nc" id="L106">                count = rs.getInt(&quot;total&quot;);</span>
+            }
+<span class="nc" id="L108">        } catch (Exception ex) {</span>
+<span class="nc" id="L109">            logger.error(&quot;Error fetching ticket count&quot;, ex);</span>
+        } finally {
+<span class="nc" id="L111">            dataBaseConfig.closeResultSet(rs);</span>
+<span class="nc" id="L112">            dataBaseConfig.closePreparedStatement(ps);</span>
+<span class="nc" id="L113">            dataBaseConfig.closeConnection(con);</span>
+        }
+
+<span class="nc" id="L116">        return count;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

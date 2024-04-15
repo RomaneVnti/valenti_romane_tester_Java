@@ -91,5 +91,28 @@ public class TicketDAO {
         return false;
     }
 
+    public int getNbTickets(String vehicleRegNumber) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        int count = 0;
 
+        try {
+            con = dataBaseConfig.getConnection();
+            ps = con.prepareStatement("SELECT COUNT(*) AS total FROM ticket WHERE vehicle_reg_number = ?");
+            ps.setString(1, vehicleRegNumber);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt("total");
+            }
+        } catch (Exception ex) {
+            logger.error("Error fetching ticket count", ex);
+        } finally {
+            dataBaseConfig.closeResultSet(rs);
+            dataBaseConfig.closePreparedStatement(ps);
+            dataBaseConfig.closeConnection(con);
+        }
+
+        return count;
+    }
 }

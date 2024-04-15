@@ -28,31 +28,43 @@ public class ParkingService {
     }
 
     public void processIncomingVehicle() {
-        try{
+        try {
             ParkingSpot parkingSpot = getNextParkingNumberIfAvailable();
-            if(parkingSpot !=null && parkingSpot.getId() > 0){
+            if (parkingSpot != null && parkingSpot.getId() > 0) {
                 String vehicleRegNumber = getVehichleRegNumber();
+                int numTickets = ticketDAO.getNbTickets(vehicleRegNumber); // Get number of tickets for this vehicle
+
                 parkingSpot.setAvailable(false);
-                parkingSpotDAO.updateParking(parkingSpot);//allot this parking space and mark it's availability as false
+                parkingSpotDAO.updateParking(parkingSpot); // allot this parking space and mark its availability as false
 
                 Date inTime = new Date();
                 Ticket ticket = new Ticket();
-                //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
+                //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME
                 //ticket.setId(ticketID);
                 ticket.setParkingSpot(parkingSpot);
                 ticket.setVehicleRegNumber(vehicleRegNumber);
                 ticket.setPrice(0);
                 ticket.setInTime(inTime);
                 ticket.setOutTime(null);
+                ticket.setDiscount(numTickets > 0); // Set discount flag based on number of previous tickets
                 ticketDAO.saveTicket(ticket);
+
                 System.out.println("Generated Ticket and saved in DB");
-                System.out.println("Please park your vehicle in spot number:"+parkingSpot.getId());
-                System.out.println("Recorded in-time for vehicle number:"+vehicleRegNumber+" is:"+inTime);
+                System.out.println("Please park your vehicle in spot number:" + parkingSpot.getId());
+                System.out.println("Recorded in-time for vehicle number:" + vehicleRegNumber + " is:" + inTime);
+
+                // Welcome message for returning customers
+                if (numTickets > 0) {
+                    System.out.println("Welcome back! As a recurring user, you are eligible for discounts.");
+                } else {
+                    System.out.println("Welcome! If you visit again, you may be eligible for discounts.");
+                }
             }
-        }catch(Exception e){
-            logger.error("Unable to process incoming vehicle",e);
+        } catch (Exception e) {
+            logger.error("Unable to process incoming vehicle", e);
         }
     }
+
 
     private String getVehichleRegNumber() throws Exception {
         System.out.println("Please type the vehicle registration number and press enter key");
@@ -98,23 +110,35 @@ public class ParkingService {
     }
 
     public void processExitingVehicle() {
-        try{
+        try {
             String vehicleRegNumber = getVehichleRegNumber();
             Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
             Date outTime = new Date();
             ticket.setOutTime(outTime);
-            fareCalculatorService.calculateFare(ticket);
-            if(ticketDAO.updateTicket(ticket)) {
+
+            int ticketCount = ticketDAO.getNbTickets(vehicleRegNumber);
+            boolean isRecurrent = ticketCount > 1;
+
+            fareCalculatorService.calculateFare(ticket, isRecurrent);
+
+            if (ticketDAO.updateTicket(ticket)) {
                 ParkingSpot parkingSpot = ticket.getParkingSpot();
                 parkingSpot.setAvailable(true);
                 parkingSpotDAO.updateParking(parkingSpot);
+
                 System.out.println("Please pay the parking fare:" + ticket.getPrice());
+                if (isRecurrent) {
+                    System.out.println("You received a 5% discount!");
+                }
                 System.out.println("Recorded out-time for vehicle number:" + ticket.getVehicleRegNumber() + " is:" + outTime);
-            }else{
+            } else {
                 System.out.println("Unable to update ticket information. Error occurred");
             }
-        }catch(Exception e){
-            logger.error("Unable to process exiting vehicle",e);
+        } catch (Exception e) {
+            logger.error("Unable to process exiting vehicle", e);
         }
     }
+
+
+
 }
