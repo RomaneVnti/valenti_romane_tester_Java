@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -86,6 +87,81 @@ public class ParkingServiceTest {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to test processIncomingVehicle");
+        }
+    }
+
+    @Test
+    public void processExitingVehicleTestUnableUpdate() {
+        try {
+            // Given
+            when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(false);
+
+            // When
+            parkingService.processExitingVehicle();
+
+            // Then
+            verify(ticketDAO, times(1)).updateTicket(any(Ticket.class));
+            verify(parkingSpotDAO, never()).updateParking(any(ParkingSpot.class));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to test processExitingVehicle when unable to update");
+        }
+    }
+
+    @Test
+    public void testGetNextParkingNumberIfAvailable() {
+        try {
+            // Given
+            when(inputReaderUtil.readSelection()).thenReturn(1); // Mocking vehicle type selection (1 for CAR)
+            when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
+            ParkingSpot expectedParkingSpot = new ParkingSpot(1, ParkingType.CAR, true);
+
+            // When
+            ParkingSpot parkingSpot = parkingService.getNextParkingNumberIfAvailable();
+
+            // Then
+            assertNotNull(parkingSpot);
+            assertEquals(expectedParkingSpot.getId(), parkingSpot.getId());
+            assertEquals(expectedParkingSpot.getParkingType(), parkingSpot.getParkingType());
+            assertEquals(expectedParkingSpot.isAvailable(), parkingSpot.isAvailable());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to test getNextParkingNumberIfAvailable");
+        }
+    }
+
+    @Test
+    public void testGetNextParkingNumberIfAvailableParkingNumberNotFound() {
+        try {
+            // Given
+            when(inputReaderUtil.readSelection()).thenReturn(1); // Mocking vehicle type selection (1 for CAR)
+            when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(-1);
+
+            // When
+            ParkingSpot parkingSpot = parkingService.getNextParkingNumberIfAvailable();
+
+            // Then
+            assertNull(parkingSpot);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to test getNextParkingNumberIfAvailable when no parking spot is available");
+        }
+    }
+
+    @Test
+    public void testGetNextParkingNumberIfAvailableParkingNumberWrongArgument() {
+        try {
+            // Given
+            when(inputReaderUtil.readSelection()).thenReturn(3); // Mocking invalid vehicle type selection
+
+            // When
+            ParkingSpot parkingSpot = parkingService.getNextParkingNumberIfAvailable();
+
+            // Then
+            assertNull(parkingSpot);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to test getNextParkingNumberIfAvailable with wrong argument");
         }
     }
 }
