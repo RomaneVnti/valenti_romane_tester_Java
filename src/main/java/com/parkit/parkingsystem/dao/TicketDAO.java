@@ -75,21 +75,26 @@ public class TicketDAO {
 
     public boolean updateTicket(Ticket ticket) {
         Connection con = null;
+        PreparedStatement ps = null;
         try {
             con = dataBaseConfig.getConnection();
-            PreparedStatement ps = con.prepareStatement(DBConstants.UPDATE_TICKET);
+            ps = con.prepareStatement(DBConstants.UPDATE_TICKET);
             ps.setDouble(1, ticket.getPrice());
             ps.setTimestamp(2, new Timestamp(ticket.getOutTime().getTime()));
-            ps.setInt(3,ticket.getId());
-            ps.execute();
-            return true;
-        }catch (Exception ex){
-            logger.error("Error saving ticket info",ex);
-        }finally {
+            ps.setBoolean(3, ticket.isDiscount()); // Ajouter cette ligne pour mettre à jour le champ discount
+            ps.setInt(4, ticket.getId());
+            int affectedRows = ps.executeUpdate();
+            logger.info("Updated ticket with ID: " + ticket.getId() + ", OutTime: " + ticket.getOutTime() + ", Affected Rows: " + affectedRows);
+            return affectedRows > 0;
+        } catch (Exception ex) {
+            logger.error("Error updating ticket", ex);
+            return false;
+        } finally {
+            dataBaseConfig.closePreparedStatement(ps);
             dataBaseConfig.closeConnection(con);
         }
-        return false;
     }
+
 
     public int getNbTickets(String vehicleRegNumber) {
         Connection con = null;

@@ -137,6 +137,14 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>com/parkit/parkingsystem/service/InteractiveShell*</exclude>
+                            </excludes>
+                            <includes>
+                                <include>com/parkit/parkingsystem/service/**</include>
+                            </includes>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

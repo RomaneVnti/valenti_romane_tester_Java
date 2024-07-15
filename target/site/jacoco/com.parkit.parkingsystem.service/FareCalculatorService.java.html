@@ -4,48 +4,93 @@ import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.model.Ticket;
 
-<span class="fc" id="L7">public class FareCalculatorService {</span>
+/**
+ * Service de calcul des tarifs de stationnement.
+ */
+<span class="fc" id="L10">public class FareCalculatorService {</span>
 
+    private static final double DISCOUNT_RATE = 0.95;
+    private static final double FREE_PARKING_DURATION = 0.5;
+
+    /**
+     * Calcul le tarif de stationnement pour un ticket.
+     * Applique une remise si indiqué.
+     *
+     * @param ticket     le ticket de stationnement
+     * @param isDiscount si une remise doit être appliquée
+     */
+    public void calculateFare(Ticket ticket, boolean isDiscount) {
+<span class="fc" id="L23">        validateTicketTimes(ticket);</span>
+
+<span class="fc" id="L25">        double durationInHours = calculateDuration(ticket);</span>
+
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (durationInHours &lt;= FREE_PARKING_DURATION) {</span>
+<span class="fc" id="L28">            ticket.setPrice(0);</span>
+<span class="fc" id="L29">            return;</span>
+        }
+
+<span class="fc" id="L32">        double ratePerHour = getRatePerHour(ticket.getParkingSpot().getParkingType());</span>
+<span class="fc" id="L33">        double price = durationInHours * ratePerHour;</span>
+
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (isDiscount) {</span>
+<span class="fc" id="L36">            price *= DISCOUNT_RATE;</span>
+        }
+
+<span class="fc" id="L39">        ticket.setPrice(price);</span>
+<span class="fc" id="L40">    }</span>
+
+    /**
+     * Calcul le tarif de stationnement pour un ticket sans remise.
+     *
+     * @param ticket le ticket de stationnement
+     */
     public void calculateFare(Ticket ticket) {
-<span class="fc" id="L10">        calculateFare(ticket, false);</span>
-<span class="fc" id="L11">    }</span>
+<span class="fc" id="L48">        calculateFare(ticket, false);</span>
+<span class="fc" id="L49">    }</span>
 
-    public void calculateFare(Ticket ticket, boolean discount) {
-<span class="fc" id="L14">        validateTicketTimes(ticket);</span>
+    /**
+     * Calcul la durée de stationnement en heures.
+     *
+     * @param ticket le ticket de stationnement
+     * @return la durée en heures
+     */
+    private double calculateDuration(Ticket ticket) {
+<span class="fc" id="L58">        long inTime = ticket.getInTime().getTime();</span>
+<span class="fc" id="L59">        long outTime = ticket.getOutTime().getTime();</span>
+<span class="fc" id="L60">        return (double) (outTime - inTime) / (60 * 60 * 1000);</span>
+    }
 
-<span class="fc" id="L16">        long durationInMillis = ticket.getOutTime().getTime() - ticket.getInTime().getTime();</span>
-<span class="fc" id="L17">        double durationInHours = durationInMillis / 3600000.0;</span>
-
-<span class="fc bfc" id="L19" title="All 2 branches covered.">        if (durationInMillis &lt; 1800000) {</span>
-<span class="fc" id="L20">            ticket.setPrice(0);</span>
-        } else {
-<span class="fc" id="L22">            double rate = getRateByParkingType(ticket.getParkingSpot().getParkingType());</span>
-<span class="fc bfc" id="L23" title="All 2 branches covered.">            if (discount) {</span>
-<span class="fc" id="L24">                rate *= 0.95; // Apply a 5% discount</span>
-            }
-<span class="fc" id="L26">            ticket.setPrice(durationInHours * rate);</span>
-        }
-<span class="fc" id="L28">    }</span>
-
-    private void validateTicketTimes(Ticket ticket) {
-<span class="pc bpc" id="L31" title="2 of 4 branches missed.">        if (ticket.getInTime() == null || ticket.getOutTime() == null) {</span>
-<span class="nc" id="L32">            throw new IllegalArgumentException(&quot;In time or out time cannot be null.&quot;);</span>
-        }
-
-<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (ticket.getOutTime().before(ticket.getInTime())) {</span>
-<span class="fc" id="L36">            throw new IllegalArgumentException(&quot;Out time must be after in time. In time: &quot; + ticket.getInTime() + &quot;, Out time: &quot; + ticket.getOutTime());</span>
-        }
-<span class="fc" id="L38">    }</span>
-
-    private double getRateByParkingType(ParkingType parkingType) {
-<span class="pc bpc" id="L41" title="1 of 3 branches missed.">        switch (parkingType) {</span>
+    /**
+     * Obtient le tarif horaire en fonction du type de stationnement.
+     *
+     * @param parkingType le type de stationnement
+     * @return le tarif horaire
+     */
+    private double getRatePerHour(ParkingType parkingType) {
+<span class="pc bpc" id="L70" title="1 of 3 branches missed.">        switch (parkingType) {</span>
             case CAR:
-<span class="fc" id="L43">                return Fare.CAR_RATE_PER_HOUR;</span>
+<span class="fc" id="L72">                return Fare.CAR_RATE_PER_HOUR;</span>
             case BIKE:
-<span class="fc" id="L45">                return Fare.BIKE_RATE_PER_HOUR;</span>
+<span class="fc" id="L74">                return Fare.BIKE_RATE_PER_HOUR;</span>
             default:
-<span class="nc" id="L47">                throw new IllegalArgumentException(&quot;Unknown Parking Type&quot;);</span>
+<span class="nc" id="L76">                throw new IllegalArgumentException(&quot;Unknown Parking Type&quot;);</span>
         }
     }
+
+    /**
+     * Valide les heures du ticket pour s'assurer que l'heure de sortie est après l'heure d'entrée.
+     *
+     * @param ticket le ticket de stationnement
+     * @throws IllegalArgumentException si les heures ne sont pas valides
+     */
+    private void validateTicketTimes(Ticket ticket) {
+<span class="pc bpc" id="L87" title="2 of 4 branches missed.">        if (ticket.getOutTime() == null || ticket.getInTime() == null) {</span>
+<span class="nc" id="L88">            throw new IllegalArgumentException(&quot;In time and out time must be provided&quot;);</span>
+        }
+
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (ticket.getOutTime().before(ticket.getInTime())) {</span>
+<span class="fc" id="L92">            throw new IllegalArgumentException(&quot;Out time must be after in time. In time: &quot; + ticket.getInTime() + &quot;, Out time: &quot; + ticket.getOutTime());</span>
+        }
+<span class="fc" id="L94">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

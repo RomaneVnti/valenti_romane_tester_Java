@@ -16,6 +16,29 @@ public class ParkingSpotDAO {
 
     public DataBaseConfig dataBaseConfig = new DataBaseConfig();
 
+    public ParkingSpot getParkingSpot(int id) {
+        ParkingSpot parkingSpot = null;
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            con = dataBaseConfig.getConnection();
+            ps = con.prepareStatement("SELECT * FROM parking WHERE PARKING_NUMBER = ?");
+            ps.setInt(1, id);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                parkingSpot = new ParkingSpot(id, ParkingType.valueOf(rs.getString("TYPE")), rs.getBoolean("AVAILABLE"));
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            dataBaseConfig.closeResultSet(rs);
+            dataBaseConfig.closePreparedStatement(ps);
+            dataBaseConfig.closeConnection(con);
+        }
+        return parkingSpot;
+    }
+
     public int getNextAvailableSlot(ParkingType parkingType){
         Connection con = null;
         int result=-1;
