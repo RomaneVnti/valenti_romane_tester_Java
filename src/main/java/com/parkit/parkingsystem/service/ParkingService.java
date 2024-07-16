@@ -204,4 +204,6 @@ public class ParkingService {
         }
         System.out.println("Recorded out-time for vehicle number: " + ticket.getVehicleRegNumber() + " is: " + outTime);
     }
+
+
 }

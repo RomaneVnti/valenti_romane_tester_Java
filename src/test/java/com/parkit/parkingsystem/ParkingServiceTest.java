@@ -176,4 +176,5 @@ public class ParkingServiceTest {
         ticket.setInTime(inTime);
         return ticket;
     }
+
 }
