@@ -81,45 +81,31 @@ public class ParkingDataBaseIT {
         assertTrue(isAvailable, "Parking spot should be marked as available");
     }
 
+
     @Test
-    public void testParkingLotExitRecurringUser() {
-        // Première entrée et sortie du véhicule pour l'enregistrer comme utilisateur récurrent
+    public void testParkingLotExitRecurringUser() throws InterruptedException {
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processIncomingVehicle();
 
-        // Simule un temps d'attente pour que l'heure de sortie soit différente de l'heure d'entrée
-        try {
-            Thread.sleep(1000); // Attendre 1 seconde
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        Thread.sleep(1000);
 
         parkingService.processExitingVehicle();
 
-        // Deuxième entrée du même véhicule
         parkingService.processIncomingVehicle();
 
-        // Simule un temps d'attente pour que l'heure de sortie soit différente de l'heure d'entrée
-        try {
-            Thread.sleep(1000); // Attendre 1 seconde
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        Thread.sleep(1000);
 
         parkingService.processExitingVehicle();
 
-        // Vérifie que le prix avec remise a été appliqué
         Ticket ticket = ticketDAO.getTicket("ABCDEF");
         assertNotNull(ticket.getOutTime(), "Out time should be populated in the database");
-        assertNotNull(ticket.getPrice(), "Fare should be generated and populated in the database");
 
-        // Calcule le prix attendu avec la remise
         double expectedFare = calculateExpectedFareWithDiscount(ticket);
         assertEquals(expectedFare, ticket.getPrice(), 0.01, "Fare should include a 5% discount for recurring users");
     }
 
+
     private double calculateExpectedFareWithDiscount(Ticket ticket) {
-        // Implémente la logique de calcul du prix avec la remise de 5 %
         double duration = (ticket.getOutTime().getTime() - ticket.getInTime().getTime()) / (1000.0 * 60.0 * 60.0); // durée en heures
         double regularFare = duration * 1.5;
         return regularFare * 0.95;
