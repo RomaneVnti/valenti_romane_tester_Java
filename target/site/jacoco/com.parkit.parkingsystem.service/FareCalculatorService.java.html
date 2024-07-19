@@ -7,46 +7,57 @@ import com.parkit.parkingsystem.model.Ticket;
 /**
  * Service de calcul des tarifs de stationnement.
  */
-<span class="fc" id="L10">public class FareCalculatorService {</span>
+public class FareCalculatorService {
 
     private static final double DISCOUNT_RATE = 0.95;
     private static final double FREE_PARKING_DURATION = 0.5;
 
+    private boolean isDiscount;
+
+<span class="fc" id="L17">    public FareCalculatorService() {</span>
+<span class="fc" id="L18">        this.isDiscount = false;</span>
+<span class="fc" id="L19">    }</span>
+
+    // Constructeur avec option de remise
+<span class="nc" id="L22">    public FareCalculatorService(boolean isDiscount) {</span>
+<span class="nc" id="L23">        this.isDiscount = isDiscount;</span>
+<span class="nc" id="L24">    }</span>
+
     /**
      * Calcul le tarif de stationnement pour un ticket.
-     * Applique une remise si indiqué.
+     * Applique une remise si indiquée.
+     *
+     * @param ticket le ticket de stationnement
+     */
+    public void calculateFare(Ticket ticket) {
+<span class="fc" id="L33">        calculateFare(ticket, this.isDiscount);</span>
+<span class="fc" id="L34">    }</span>
+
+    /**
+     * Calcul le tarif de stationnement pour un ticket en tenant compte de la remise spécifiée.
      *
      * @param ticket     le ticket de stationnement
      * @param isDiscount si une remise doit être appliquée
      */
     public void calculateFare(Ticket ticket, boolean isDiscount) {
-<span class="fc" id="L23">        validateTicketTimes(ticket);</span>
+<span class="fc" id="L43">        validateTicketTimes(ticket);</span>
 
-<span class="fc" id="L25">        double durationInHours = calculateDuration(ticket);</span>
+<span class="fc" id="L45">        double durationInHours = calculateDuration(ticket);</span>
 
-<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (durationInHours &lt;= FREE_PARKING_DURATION) {</span>
-<span class="fc" id="L28">            ticket.setPrice(0);</span>
-<span class="fc" id="L29">            return;</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (durationInHours &lt;= FREE_PARKING_DURATION) {</span>
+<span class="fc" id="L48">            ticket.setPrice(0);</span>
+<span class="fc" id="L49">            return;</span>
         }
 
-<span class="fc" id="L32">        double ratePerHour = getRatePerHour(ticket.getParkingSpot().getParkingType());</span>
-<span class="fc" id="L33">        double price = durationInHours * ratePerHour;</span>
+<span class="fc" id="L52">        double ratePerHour = getRatePerHour(ticket.getParkingSpot().getParkingType());</span>
+<span class="fc" id="L53">        double price = durationInHours * ratePerHour;</span>
 
-<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (isDiscount) {</span>
-<span class="fc" id="L36">            price *= DISCOUNT_RATE;</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        if (isDiscount) {</span>
+<span class="fc" id="L56">            price *= DISCOUNT_RATE;</span>
         }
 
-<span class="fc" id="L39">        ticket.setPrice(price);</span>
-<span class="fc" id="L40">    }</span>
-
-    /**
-     * Calcul le tarif de stationnement pour un ticket sans remise.
-     *
-     * @param ticket le ticket de stationnement
-     */
-    public void calculateFare(Ticket ticket) {
-<span class="fc" id="L48">        calculateFare(ticket, false);</span>
-<span class="fc" id="L49">    }</span>
+<span class="fc" id="L59">        ticket.setPrice(price);</span>
+<span class="fc" id="L60">    }</span>
 
     /**
      * Calcul la durée de stationnement en heures.
@@ -55,9 +66,9 @@ import com.parkit.parkingsystem.model.Ticket;
      * @return la durée en heures
      */
     private double calculateDuration(Ticket ticket) {
-<span class="fc" id="L58">        long inTime = ticket.getInTime().getTime();</span>
-<span class="fc" id="L59">        long outTime = ticket.getOutTime().getTime();</span>
-<span class="fc" id="L60">        return (double) (outTime - inTime) / (60 * 60 * 1000);</span>
+<span class="fc" id="L69">        long inTime = ticket.getInTime().getTime();</span>
+<span class="fc" id="L70">        long outTime = ticket.getOutTime().getTime();</span>
+<span class="fc" id="L71">        return (double) (outTime - inTime) / (60 * 60 * 1000);</span>
     }
 
     /**
@@ -67,13 +78,13 @@ import com.parkit.parkingsystem.model.Ticket;
      * @return le tarif horaire
      */
     private double getRatePerHour(ParkingType parkingType) {
-<span class="pc bpc" id="L70" title="1 of 3 branches missed.">        switch (parkingType) {</span>
+<span class="pc bpc" id="L81" title="1 of 3 branches missed.">        switch (parkingType) {</span>
             case CAR:
-<span class="fc" id="L72">                return Fare.CAR_RATE_PER_HOUR;</span>
+<span class="fc" id="L83">                return Fare.CAR_RATE_PER_HOUR;</span>
             case BIKE:
-<span class="fc" id="L74">                return Fare.BIKE_RATE_PER_HOUR;</span>
+<span class="fc" id="L85">                return Fare.BIKE_RATE_PER_HOUR;</span>
             default:
-<span class="nc" id="L76">                throw new IllegalArgumentException(&quot;Unknown Parking Type&quot;);</span>
+<span class="nc" id="L87">                throw new IllegalArgumentException(&quot;Unknown Parking Type&quot;);</span>
         }
     }
 
@@ -84,13 +95,21 @@ import com.parkit.parkingsystem.model.Ticket;
      * @throws IllegalArgumentException si les heures ne sont pas valides
      */
     private void validateTicketTimes(Ticket ticket) {
-<span class="pc bpc" id="L87" title="2 of 4 branches missed.">        if (ticket.getOutTime() == null || ticket.getInTime() == null) {</span>
-<span class="nc" id="L88">            throw new IllegalArgumentException(&quot;In time and out time must be provided&quot;);</span>
+<span class="pc bpc" id="L98" title="2 of 4 branches missed.">        if (ticket.getOutTime() == null || ticket.getInTime() == null) {</span>
+<span class="nc" id="L99">            throw new IllegalArgumentException(&quot;In time and out time must be provided&quot;);</span>
         }
 
-<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (ticket.getOutTime().before(ticket.getInTime())) {</span>
-<span class="fc" id="L92">            throw new IllegalArgumentException(&quot;Out time must be after in time. In time: &quot; + ticket.getInTime() + &quot;, Out time: &quot; + ticket.getOutTime());</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        if (ticket.getOutTime().before(ticket.getInTime())) {</span>
+<span class="fc" id="L103">            throw new IllegalArgumentException(&quot;Out time must be after in time. In time: &quot; + ticket.getInTime() + &quot;, Out time: &quot; + ticket.getOutTime());</span>
         }
-<span class="fc" id="L94">    }</span>
+<span class="fc" id="L105">    }</span>
+
+    public void setDiscount(boolean discount) {
+<span class="nc" id="L108">        this.isDiscount = discount;</span>
+<span class="nc" id="L109">    }</span>
+
+    public boolean isDiscount() {
+<span class="nc" id="L112">        return this.isDiscount;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

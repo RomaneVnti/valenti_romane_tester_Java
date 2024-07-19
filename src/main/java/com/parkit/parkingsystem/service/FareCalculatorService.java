@@ -12,9 +12,29 @@ public class FareCalculatorService {
     private static final double DISCOUNT_RATE = 0.95;
     private static final double FREE_PARKING_DURATION = 0.5;
 
+    private boolean isDiscount;
+
+    public FareCalculatorService() {
+        this.isDiscount = false;
+    }
+
+    // Constructeur avec option de remise
+    public FareCalculatorService(boolean isDiscount) {
+        this.isDiscount = isDiscount;
+    }
+
     /**
      * Calcul le tarif de stationnement pour un ticket.
-     * Applique une remise si indiqué.
+     * Applique une remise si indiquée.
+     *
+     * @param ticket le ticket de stationnement
+     */
+    public void calculateFare(Ticket ticket) {
+        calculateFare(ticket, this.isDiscount);
+    }
+
+    /**
+     * Calcul le tarif de stationnement pour un ticket en tenant compte de la remise spécifiée.
      *
      * @param ticket     le ticket de stationnement
      * @param isDiscount si une remise doit être appliquée
@@ -37,15 +57,6 @@ public class FareCalculatorService {
         }
 
         ticket.setPrice(price);
-    }
-
-    /**
-     * Calcul le tarif de stationnement pour un ticket sans remise.
-     *
-     * @param ticket le ticket de stationnement
-     */
-    public void calculateFare(Ticket ticket) {
-        calculateFare(ticket, false);
     }
 
     /**
@@ -91,5 +102,13 @@ public class FareCalculatorService {
         if (ticket.getOutTime().before(ticket.getInTime())) {
             throw new IllegalArgumentException("Out time must be after in time. In time: " + ticket.getInTime() + ", Out time: " + ticket.getOutTime());
         }
+    }
+
+    public void setDiscount(boolean discount) {
+        this.isDiscount = discount;
+    }
+
+    public boolean isDiscount() {
+        return this.isDiscount;
     }
 }

@@ -43,21 +43,16 @@ public class ParkingServiceTest {
      * Configuration avant chaque test.
      */
     @BeforeEach
-    public void setUpPerTest() {
-        try {
-            lenient().when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+    public void setUpPerTest() throws Exception {
+        lenient().when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
 
-            ParkingSpot parkingSpot = createParkingSpot(1, ParkingType.CAR, false);
-            Ticket ticket = createTicket(parkingSpot, "ABCDEF", new Date(System.currentTimeMillis() - (60 * 60 * 1000)));
+        ParkingSpot parkingSpot = createParkingSpot(1, ParkingType.CAR, false);
+        Ticket ticket = createTicket(parkingSpot, "ABCDEF", new Date(System.currentTimeMillis() - (60 * 60 * 1000)));
 
-            lenient().when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
-            lenient().when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
-            lenient().when(ticketDAO.getNbTickets(anyString())).thenReturn(1);
-            lenient().when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
-        } catch (Exception e) {
-            logger.error("Erreur lors de la configuration des tests", e);
-            throw new RuntimeException("Failed to set up test mock objects");
-        }
+        lenient().when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
+        lenient().when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
+        lenient().when(ticketDAO.getNbTickets(anyString())).thenReturn(1);
+        lenient().when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
     }
 
     /**
@@ -75,23 +70,18 @@ public class ParkingServiceTest {
      * Teste le processus d'entrée d'un véhicule.
      */
     @Test
-    public void testProcessIncomingVehicle() {
-        try {
-            when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
-            when(inputReaderUtil.readSelection()).thenReturn(1);
-            when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
-            ParkingSpot parkingSpot = createParkingSpot(1, ParkingType.CAR, true);
-            when(parkingSpotDAO.updateParking(parkingSpot)).thenReturn(true);
-            when(ticketDAO.saveTicket(any(Ticket.class))).thenReturn(true);
+    public void testProcessIncomingVehicle() throws Exception {
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
+        ParkingSpot parkingSpot = createParkingSpot(1, ParkingType.CAR, true);
+        when(parkingSpotDAO.updateParking(parkingSpot)).thenReturn(true);
+        when(ticketDAO.saveTicket(any(Ticket.class))).thenReturn(true);
 
-            parkingService.processIncomingVehicle();
+        parkingService.processIncomingVehicle();
 
-            verify(parkingSpotDAO, times(1)).updateParking(parkingSpot);
-            verify(ticketDAO, times(1)).saveTicket(any(Ticket.class));
-        } catch (Exception e) {
-            logger.error("Erreur lors de la configuration du test processIncomingVehicle", e);
-            throw new RuntimeException("Failed to test processIncomingVehicle");
-        }
+        verify(parkingSpotDAO, times(1)).updateParking(parkingSpot);
+        verify(ticketDAO, times(1)).saveTicket(any(Ticket.class));
     }
 
     /**
@@ -176,5 +166,4 @@ public class ParkingServiceTest {
         ticket.setInTime(inTime);
         return ticket;
     }
-
 }

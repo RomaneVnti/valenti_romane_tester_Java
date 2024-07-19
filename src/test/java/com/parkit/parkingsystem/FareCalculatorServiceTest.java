@@ -25,7 +25,7 @@ public class FareCalculatorServiceTest {
      * Configuration initiale avant tous les tests.
      */
     @BeforeAll
-    private static void setUp() {
+    public static void setUp() {
         fareCalculatorService = new FareCalculatorService();
     }
 
@@ -33,7 +33,7 @@ public class FareCalculatorServiceTest {
      * Configuration avant chaque test.
      */
     @BeforeEach
-    private void setUpPerTest() {
+    public void setUpPerTest() {
         ticket = new Ticket();
     }
 
